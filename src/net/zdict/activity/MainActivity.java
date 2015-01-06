@@ -33,42 +33,56 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-
-		HttpPost  httpRequest=new HttpPost("http://www.zdic.net/sousuo"); 
-		 List <NameValuePair> params=new ArrayList<NameValuePair>(); 
-	     params.add(new BasicNameValuePair("lb_a","hp"));
-	     params.add(new BasicNameValuePair("lb_b","mh")); 
-	     params.add(new BasicNameValuePair("lb_c","mh")); 
-	     params.add(new BasicNameValuePair("q","beijibear")); 
-	     params.add(new BasicNameValuePair("tp","tp1")); 
-	     
-	     try { 
-	            //发出HTTP request 
-	            httpRequest.setEntity(new UrlEncodedFormEntity(params,HTTP.UTF_8)); 
-	            //取得HTTP response 
-	            HttpResponse httpResponse=new DefaultHttpClient().execute(httpRequest); 
-	            //若状态码为200 
-	            if(httpResponse.getStatusLine().getStatusCode()==200){
-	                //取出回应字串 
-	                String strResult=EntityUtils.toString(httpResponse.getEntity()); 
-	               // tv.setText(strResult);
-	                String aa=httpResponse.getStatusLine().toString();
-
-	              //  tv.setText("Error Response"+httpResponse.getStatusLine().toString()); 
-	            	System.out.println(aa);
-	            } 
-	        } catch (Exception e) { 
-	            // TODO Auto-generated catch block 
-	            //tv.setText(e.getMessage().toString());
-	        } 
-		
+	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Button button1 = (Button)findViewById(R.id.button1);
+		
+		button1.setOnClickListener(new Button.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(MainActivity.this,"成功", Toast.LENGTH_SHORT).show();
+				//HttpPost httpRequest=new HttpPost("http://www.zdic.net/sousuo/");
+				 HttpPost httpRequest=new HttpPost("http://www.baidu.com/");
+				 List <NameValuePair> params=new ArrayList<NameValuePair>(); 
+			     params.add(new BasicNameValuePair("lb_a","hp"));
+			     params.add(new BasicNameValuePair("lb_b","mh")); 
+			     params.add(new BasicNameValuePair("lb_c","mh")); 
+			     params.add(new BasicNameValuePair("q","beijibear")); 
+			     params.add(new BasicNameValuePair("tp","tp1")); 
+			     
+			     try { 
+			            //发出HTTP request 
+			            httpRequest.setEntity(new UrlEncodedFormEntity(params,HTTP.UTF_8)); 
+			            //取得HTTP response 
+			            HttpResponse httpResponse=new DefaultHttpClient().execute(httpRequest);
+
+			            //若状态码为200 
+			            if(httpResponse.getStatusLine().getStatusCode()==200){
+			                //取出回应字串 
+			                String strResult=EntityUtils.toString(httpResponse.getEntity()); 
+			               // tv.setText(strResult);
+			                String aa=httpResponse.getStatusLine().toString();
+
+			              //  tv.setText("Error Response"+httpResponse.getStatusLine().toString()); 
+			            	System.out.println(aa);
+			            } 
+			        } catch (Exception e) {
+			        	Log.d("chp", e.getMessage());
+			            // TODO Auto-generated catch block 
+			            //tv.setText(e.getMessage().toString());
+			        } }
+		});
+		
+
 	}
 
 	@Override
