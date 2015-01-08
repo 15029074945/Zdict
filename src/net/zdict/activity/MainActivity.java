@@ -1,6 +1,8 @@
 package net.zdict.activity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -29,57 +32,50 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
+
+
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-
+	
+	private Button PostButton = null;
+	private Button GETButton = null;
+ 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {		
+	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Button button1 = (Button)findViewById(R.id.button1);
+		PostButton = (Button)findViewById(R.id.POST);
+		GETButton = (Button)findViewById(R.id.GET);
 		
-		button1.setOnClickListener(new Button.OnClickListener() {
+		PostButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				//postbutton1onClick(v);
+				new postbutton1onClick().start();
+			}
+		});
+		
+		GETButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(MainActivity.this,"成功", Toast.LENGTH_SHORT).show();
-				//HttpPost httpRequest=new HttpPost("http://www.zdic.net/sousuo/");
-				 HttpPost httpRequest=new HttpPost("http://www.baidu.com/");
-				 List <NameValuePair> params=new ArrayList<NameValuePair>(); 
-			     params.add(new BasicNameValuePair("lb_a","hp"));
-			     params.add(new BasicNameValuePair("lb_b","mh")); 
-			     params.add(new BasicNameValuePair("lb_c","mh")); 
-			     params.add(new BasicNameValuePair("q","beijibear")); 
-			     params.add(new BasicNameValuePair("tp","tp1")); 
-			     
-			     try { 
-			            //发出HTTP request 
-			            httpRequest.setEntity(new UrlEncodedFormEntity(params,HTTP.UTF_8)); 
-			            //取得HTTP response 
-			            HttpResponse httpResponse=new DefaultHttpClient().execute(httpRequest);
-
-			            //若状态码为200 
-			            if(httpResponse.getStatusLine().getStatusCode()==200){
-			                //取出回应字串 
-			                String strResult=EntityUtils.toString(httpResponse.getEntity()); 
-			               // tv.setText(strResult);
-			                String aa=httpResponse.getStatusLine().toString();
-
-			              //  tv.setText("Error Response"+httpResponse.getStatusLine().toString()); 
-			            	System.out.println(aa);
-			            } 
-			        } catch (Exception e) {
-			        	Log.d("chp", e.getMessage());
-			            // TODO Auto-generated catch block 
-			            //tv.setText(e.getMessage().toString());
-			        } }
+				// TODO Auto-generated method stub
+				//getbutton1onClick(v);
+				new ReceiveMessageThread().start();
+				
+			}
 		});
 		
 
@@ -159,5 +155,159 @@ public class MainActivity extends Activity {
 
 		return new DefaultHttpClient(conMgr, params);
 	}
+
+	
+	class postbutton1onClick  extends Thread {
+
+
+		//Toast.makeText(MainActivity.this,"成功", Toast.LENGTH_SHORT).show();
+		//HttpPost httpRequest=new HttpPost("http://www.zdic.net/sousuo/");
+		 @Override
+		public void run() {
+			// TODO Auto-generated method stub
+			 	String url ="http://www.zdic.net/z/27/js/9648.htm";
+			 		url = "http://www.zdic.net/sousuo/";
+				HttpPost httpPostRequest=new HttpPost(url);
+				httpPostRequest.addHeader("Content-Type", "text/html; Charset=UTF-8");
+				 List <NameValuePair> params=new ArrayList<NameValuePair>(); 
+			     params.add(new BasicNameValuePair("lb_a","hp"));
+			     params.add(new BasicNameValuePair("lb_b","mh")); 
+			     params.add(new BasicNameValuePair("lb_c","mh")); 
+			     params.add(new BasicNameValuePair("q","陈")); 
+			     params.add(new BasicNameValuePair("tp","tp1")); 
+			     HttpClient client = new DefaultHttpClient(); 
+			     try { 
+			            //发出HTTP request 
+			    	 httpPostRequest.setEntity(new UrlEncodedFormEntity(params,HTTP.UTF_8)); 
+			            //取得HTTP response 
+			            HttpResponse httpResponse=client.execute(httpPostRequest);
+
+			            //若状态码为200 
+			            if(httpResponse.getStatusLine().getStatusCode()==200){
+			                //取出回应字串 
+			                String strResult=EntityUtils.toString(httpResponse.getEntity()); 
+			               // tv.setText(strResult);
+			                String aa=httpResponse.getStatusLine().toString();
+
+			              //  tv.setText("Error Response"+httpResponse.getStatusLine().toString()); 
+			            	System.out.println(aa);
+			            } 
+			        } catch (Exception e) {
+			        	Log.d("chp", e.getMessage());
+			            // TODO Auto-generated catch block 
+			            //tv.setText(e.getMessage().toString());
+			        } 
+		}
+	     }
+	
+	public void getbutton1onClick(View v) {
+        String result = null;  
+        try{                 
+            HttpClient client = new DefaultHttpClient();         
+            HttpGet get = new HttpGet("http://www.deutschine.com");        
+            HttpResponse response = client.execute(get);          
+            HttpEntity entity = response.getEntity();              
+            long length = entity.getContentLength();                
+            InputStream is = entity.getContent();                  
+            System.out.print(length);  
+            if(is != null) {                       
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();            
+                byte[] buf = new byte[128];                    
+                int ch = -1;                     
+                int count = 0;            
+                int percent=0;  
+                while((ch = is.read(buf)) != -1) {          
+                    baos.write(buf, 0, ch);     
+                      
+                    count += ch;                          
+                    if(length > 0) {          
+                          
+                        percent=(int) ((count / (float) length) * 100);  
+                          
+                        Looper looper = Looper.getMainLooper();      
+
+                        Message msg =new Message();  
+                        if(percent<100){  
+                            msg.what=1;  
+                            msg.obj= String.valueOf(percent);    
+                        }  
+                        else{  
+                            result = new String(baos.toByteArray());  
+                            msg.what=2;  
+                            msg.obj= String.valueOf(result);  
+                        }  
+                              
+                         // 将Message对象送入到main thread的MessageQueue里面     
+
+                              
+                        }                           
+                        Thread.sleep(50);    // 让线程休眠50ms                  
+                    }            
+                            
+            }                
+        } catch(Exception e) {           
+            e.printStackTrace();          
+        }  
+		
+	}
+	
+    class ReceiveMessageThread extends Thread {    
+        
+        @Override    
+        public void run(){    
+            Looper.prepare();    
+              System.out.println("thread is start!");  
+                  
+                String result = null;  
+                try{                 
+                    HttpClient client = new DefaultHttpClient();         
+                    HttpGet get = new HttpGet("http://www.zdic.com");        
+                    HttpResponse response = client.execute(get);          
+                    HttpEntity entity = response.getEntity();              
+                    long length = entity.getContentLength();                
+                    InputStream is = entity.getContent();                  
+                    System.out.print(length);  
+                    if(is != null) {                       
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();            
+                        byte[] buf = new byte[128];                    
+                        int ch = -1;                     
+                        int count = 0;            
+                        int percent=0;  
+                        while((ch = is.read(buf)) != -1) {          
+                            baos.write(buf, 0, ch);     
+                              
+                            count += ch;                          
+                            if(length > 0) {          
+                                  
+                                percent=(int) ((count / (float) length) * 100);  
+                                  
+                                Looper looper = Looper.getMainLooper();      
+
+                                Message msg =new Message();  
+                                if(percent<100){  
+                                    msg.what=1;  
+                                    msg.obj= String.valueOf(percent);    
+                                }  
+                                else{  
+                                    result = new String(baos.toByteArray());  
+                                    msg.what=2;  
+                                    msg.obj= String.valueOf(result);  
+                                }  
+                                      
+
+                                      
+                                }                           
+                                Thread.sleep(50);    // 让线程休眠50ms                  
+                            }            
+                                    
+                    }                
+                } catch(Exception e) {
+                    e.printStackTrace();          
+                }               
+                  
+             Looper.loop();    
+        }    
+    }  
+  
 
 }
