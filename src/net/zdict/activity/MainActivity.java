@@ -31,6 +31,8 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 
 
@@ -40,46 +42,102 @@ import android.os.Looper;
 import android.os.Message;
 import android.app.Activity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	
 	private Button PostButton = null;
 	private Button GETButton = null;
- 
+	private EditText editText = null;
+	private TextView textview = null;
+	private WebView webview = null;
+	Handler handler = new Handler(){
+
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			super.handleMessage(msg);
+			textview.setText((String)msg.obj);
+			
+		}
+		
+	};
+	Message message = handler.obtainMessage();
+	
+//	@Override
+//	protected void onCreate(Bundle savedInstanceState) {
+//		super.onCreate(savedInstanceState);
+//		setContentView(R.layout.activity_main);
+//		PostButton = (Button)findViewById(R.id.POST);
+//		editText = (EditText)findViewById(R.id.editText1);
+//		webview = (WebView)findViewById(R.id.webView1);
+//		textview.setText("OKOKOK");
+//		
+//		PostButton.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				// TODO Auto-generated method stub
+//				//postbutton1onClick(v);
+//				new postbutton1onClick().start();
+//			}
+//		});
+//		
+//
+//		
+//
+//	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
-		PostButton = (Button)findViewById(R.id.POST);
-		GETButton = (Button)findViewById(R.id.GET);
-		
-		PostButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				//postbutton1onClick(v);
-				new postbutton1onClick().start();
-			}
-		});
-		
-		GETButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				//getbutton1onClick(v);
-				new ReceiveMessageThread().start();
-				
-			}
-		});
-		
+		setContentView(R.layout.web_main);
+		webview = (WebView)findViewById(R.id.webView1);
+		WebSettings settings = webview.getSettings();
+		settings.setJavaScriptEnabled(true);
+		webview.loadUrl("http://wap.zdic.net");
+	        //覆盖WebView默认使用第三方或系统默认浏览器打开网页的行为，使网页用WebView打开
+		webview.setWebViewClient(new WebViewClient(){
+	           @Override
+	        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+	            // TODO Auto-generated method stub
+	               //返回值是true的时候控制去WebView打开，为false调用系统浏览器或第三方浏览器
+	             view.loadUrl(url);
+	            return true;
+	        }
+	       });		
 
 	}
+	
+	
+	//改写物理按键——返回的逻辑
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // TODO Auto-generated method stub
+        if(keyCode==KeyEvent.KEYCODE_BACK)
+        {
+            if(webview.canGoBack())
+            {
+            	webview.goBack();//返回上一页面
+                return true;
+            }
+            else
+            {
+                System.exit(0);//退出程序
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,41 +214,39 @@ public class MainActivity extends Activity {
 		return new DefaultHttpClient(conMgr, params);
 	}
 
-	
+
 	class postbutton1onClick  extends Thread {
 
 
 		//Toast.makeText(MainActivity.this,"成功", Toast.LENGTH_SHORT).show();
-		//HttpPost httpRequest=new HttpPost("http://www.zdic.net/sousuo/");
+		//HttpPost httpRequest=new HttpPost("http://www.zdic.net/sousuo");
 		 @Override
 		public void run() {
 			// TODO Auto-generated method stub
-			 	String url ="http://www.zdic.net/z/27/js/9648.htm";
-			 		url = "http://www.zdic.net/sousuo/";
-				HttpPost httpPostRequest=new HttpPost(url);
+			 	String findworld =editText.getText().toString();
+			 	//String 	url = "http://www.zdic.net/sousuo?lb_a=hp&lb_b=mh&lb_c=mh&q="+findworld+"&tp=tp1";
+			 	String url = "http://wap.zdic.net/s?q="+findworld+"&submit.x=56&submit.y=21";
+			 	 	//url = "http://www.baidu.com";
+			 	HttpClient client = new DefaultHttpClient(); 
+				HttpPost httpPostRequest=new HttpPost(url);	
+				HttpGet httpGet = new HttpGet(url);
+				httpGet.addHeader("Content-Type", "text/html; Charset=UTF-8");
 				httpPostRequest.addHeader("Content-Type", "text/html; Charset=UTF-8");
-				 List <NameValuePair> params=new ArrayList<NameValuePair>(); 
-			     params.add(new BasicNameValuePair("lb_a","hp"));
-			     params.add(new BasicNameValuePair("lb_b","mh")); 
-			     params.add(new BasicNameValuePair("lb_c","mh")); 
-			     params.add(new BasicNameValuePair("q","陈")); 
-			     params.add(new BasicNameValuePair("tp","tp1")); 
-			     HttpClient client = new DefaultHttpClient(); 
-			     try { 
-			            //发出HTTP request 
-			    	 httpPostRequest.setEntity(new UrlEncodedFormEntity(params,HTTP.UTF_8)); 
-			            //取得HTTP response 
-			            HttpResponse httpResponse=client.execute(httpPostRequest);
 
-			            //若状态码为200 
+			     try { 
+		            //取得H  TTP response 
+			            HttpResponse httpResponse=client.execute(httpGet);
+
+			            // 若状态 码为 200 
 			            if(httpResponse.getStatusLine().getStatusCode()==200){
 			                //取出回应字串 
-			                String strResult=EntityUtils.toString(httpResponse.getEntity()); 
-			               // tv.setText(strResult);
-			                String aa=httpResponse.getStatusLine().toString();
+			                String strResult=EntityUtils.toString(httpResponse.getEntity(),"utf-8"); 
+			            	System.out.println(strResult);		            	
+			            	Document doc = Jsoup.parse(strResult);
+			            	String tit =  doc.title();
+			            	message.obj=tit;
+			            	handler.sendMessage(message);
 
-			              //  tv.setText("Error Response"+httpResponse.getStatusLine().toString()); 
-			            	System.out.println(aa);
 			            } 
 			        } catch (Exception e) {
 			        	Log.d("chp", e.getMessage());
@@ -198,6 +254,31 @@ public class MainActivity extends Activity {
 			            //tv.setText(e.getMessage().toString());
 			        } 
 		}
+	     }
+	
+	
+	class postbutton1onClick_1  extends Thread {
+
+
+		//Toast.makeText(MainActivity.this,"成功", Toast.LENGTH_SHORT).show();
+		//HttpPost httpRequest=new HttpPost("http://www.zdic.net/sousuo");
+		 @Override
+		public void run() {
+			 String findworld =editText.getText().toString();
+			 String url = "http://wap.zdic.net/s?q="+findworld+"&submit.x=56&submit.y=21";
+			 Document doc;
+			try {
+				doc = Jsoup.connect(url).get();
+				 String title = doc.title();
+				 
+				 
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+			 
+		 }
 	     }
 	
 	public void getbutton1onClick(View v) {
@@ -216,7 +297,7 @@ public class MainActivity extends Activity {
                 int ch = -1;                     
                 int count = 0;            
                 int percent=0;  
-                while((ch = is.read(buf)) != -1) {          
+                while((ch = is.read(buf)) != -1) {
                     baos.write(buf, 0, ch);     
                       
                     count += ch;                          
